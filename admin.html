@@ -446,22 +446,34 @@ function renderVisitas(visits){
       </div>
 
       <div class="info-grid">
-        <div class="info-item"><div class="k">Dirección IP</div><div class="v">${v.ip||"N/A"}</div></div>
-        <div class="info-item"><div class="k">Idioma</div><div class="v">${v.idioma||"N/A"}</div></div>
-        <div class="info-item"><div class="k">Pantalla</div><div class="v">${v.pantalla||"N/A"}</div></div>
+        <div class="info-item"><div class="k">📅 Fecha y hora</div><div class="v">${v.fecha_legible||new Date(v.fecha).toLocaleString("es")}</div></div>
+        <div class="info-item"><div class="k">🌐 Zona horaria</div><div class="v">${v.zona_horaria||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🔌 IP</div><div class="v">${v.ip||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🏢 ISP / Proveedor</div><div class="v">${v.isp||"N/A"}</div></div>
+        <div class="info-item"><div class="k">📍 Ciudad (IP)</div><div class="v">${v.ciudad_ip||"N/A"}, ${v.pais_ip||""}</div></div>
+        <div class="info-item"><div class="k">🤖 ¿Es bot?</div><div class="v" style="color:${(v.dispositivo?.es_bot||v.es_bot||"No").includes("Sí")?'var(--red)':'var(--green)'}">${v.dispositivo?.es_bot||v.es_bot||"No"}</div></div>
+        <div class="info-item"><div class="k">🖥 Sistema Operativo</div><div class="v">${v.dispositivo?.sistema_operativo||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🌍 Navegador</div><div class="v">${v.dispositivo?.navegador||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🎮 GPU / Tarjeta gráfica</div><div class="v">${v.dispositivo?.gpu||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🧠 RAM</div><div class="v">${v.dispositivo?.ram||"N/A"}</div></div>
+        <div class="info-item"><div class="k">⚙️ CPU (núcleos)</div><div class="v">${v.dispositivo?.cpu_nucleos||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🖥 Resolución pantalla</div><div class="v">${v.dispositivo?.resolucion||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🔋 Batería</div><div class="v">${typeof v.dispositivo?.bateria==="object"&&v.dispositivo?.bateria ? v.dispositivo.bateria.nivel+" — Cargando: "+v.dispositivo.bateria.cargando : v.dispositivo?.bateria||"N/A"}</div></div>
+        <div class="info-item"><div class="k">📶 Conexión / Red</div><div class="v">${v.dispositivo?.conexion||"N/A"}</div></div>
+        <div class="info-item"><div class="k">🌐 Idioma</div><div class="v">${v.dispositivo?.idioma||"N/A"}</div></div>
+        <div class="info-item"><div class="k">📱 Touch points</div><div class="v">${v.dispositivo?.touch_points??'N/A'}</div></div>
         ${hasGPS?`
-        <div class="info-item"><div class="k">Latitud</div><div class="v">${v.gps.lat.toFixed(6)}</div></div>
-        <div class="info-item"><div class="k">Longitud</div><div class="v">${v.gps.lng.toFixed(6)}</div></div>
-        <div class="info-item"><div class="k">Precisión GPS</div><div class="v">±${v.gps.precision} m</div></div>
-        `:
-        `<div class="info-item"><div class="k">GPS</div><div class="v" style="color:var(--amber)">No disponible</div></div>
-         <div class="info-item"><div class="k">Motivo</div><div class="v" style="color:var(--muted)">${v.motivo||"—"}</div></div>
+        <div class="info-item"><div class="k">📍 Latitud</div><div class="v">${v.gps.lat.toFixed(6)}</div></div>
+        <div class="info-item"><div class="k">📍 Longitud</div><div class="v">${v.gps.lng.toFixed(6)}</div></div>
+        <div class="info-item"><div class="k">🎯 Precisión GPS</div><div class="v">±${v.gps.precision} m</div></div>
+        `:`
+        <div class="info-item"><div class="k">📍 GPS</div><div class="v" style="color:var(--amber)">No disponible</div></div>
+        <div class="info-item"><div class="k">❓ Motivo</div><div class="v" style="color:var(--muted)">${v.motivo||"—"}</div></div>
         `}
       </div>
-
       <div class="info-item" style="margin-bottom:10px;background:var(--surf)">
-        <div class="k">User Agent</div>
-        <div class="v" style="font-size:11px;font-family:DM Mono,monospace;color:var(--muted2)">${agente}</div>
+        <div class="k">User Agent completo</div>
+        <div class="v" style="font-size:11px;font-family:DM Mono,monospace;color:var(--muted2)">${v.dispositivo?.user_agent||agente}</div>
       </div>
 
       ${hasGPS?`
